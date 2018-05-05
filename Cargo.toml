@@ -1,0 +1,6 @@
+[package]
+name = "calculator"
+version = "0.1.0"
+authors = ["Alan Gou <alanjgou@gmail.com>"]
+
+[dependencies]
