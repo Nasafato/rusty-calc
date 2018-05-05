@@ -1,4 +1,5 @@
-use std::fmt::Error;
+use std::fmt;
+use std::error;
 
 #[derive(Debug, PartialEq)]
 pub enum Symbol {
@@ -9,13 +10,16 @@ pub enum Symbol {
 }
 
 impl Symbol {
-    fn from_char(c: &char) -> Result<Self, Error> {
+    fn from_char(c: &char) -> Result<Self, TokenizerError> {
         match *c {
             '+' => Ok(Symbol::Plus),
             '-' => Ok(Symbol::Minus),
             '*' => Ok(Symbol::Multiply),
             '/' => Ok(Symbol::Divide),
-            _ => Err(Error{})
+            _ => Err(TokenizerError{
+                message: String::from("Invalid char to symbol"),
+                string: c.to_string()
+            })
         }
     }
 }
@@ -27,12 +31,30 @@ pub enum Token {
 }
 
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct TokenizerError {
+    pub message: String,
+    pub string: String
+}
+
+impl fmt::Display for TokenizerError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} ({})", self.message, self.string)
+    }
+}
+
+impl error::Error for TokenizerError {
+    fn description(&self) -> &str {
+        &self.message
+    }
+}
+
 pub trait Tokenizer {
-    fn tokenize(&self) -> Result<Vec<Token>, Error>;
+    fn tokenize(&self) -> Result<Vec<Token>, TokenizerError>;
 }
 
 impl Tokenizer for str {
-    fn tokenize(&self) -> Result<Vec<Token>, Error> {
+    fn tokenize(&self) -> Result<Vec<Token>, TokenizerError> {
         let mut tokens: Vec<Token> = Vec::new();
         let mut start = 0;
         let mut end = 0;
@@ -48,7 +70,10 @@ impl Tokenizer for str {
                     end = end+1;
                 }
                 _ => {
-                    return Err(Error{})
+                    return Err(TokenizerError{
+                        message: String::from("Invalid char to symbol"),
+                        string: c.to_string()
+                    })
                 }
             }
         }
@@ -57,14 +82,17 @@ impl Tokenizer for str {
     }
 }
 
-fn parse_token(token: &str, tokens: &mut Vec<Token>) -> Result<(), Error> {
+fn parse_token(token: &str, tokens: &mut Vec<Token>) -> Result<(), TokenizerError> {
     match token.parse::<u32>() {
         Ok(num) => {
             tokens.push(Token::Integer(num));
             Ok(())
         }
         Err(_) => {
-            Err(Error{})
+            Err(TokenizerError {
+                message: String::from("Error parsing u32"),
+                string: token.clone().to_string()
+            })
         }
     }
 }
@@ -77,7 +105,10 @@ fn test_baby_tokenizer() {
         (String::from("12+34*56"), 
         Ok(vec![Token::Integer(12), Token::Operator(Symbol::Plus), Token::Integer(34), Token::Operator(Symbol::Multiply), Token::Integer(56)])),
         (String::from("asdf"),
-        Err(Error{}))
+            Err(TokenizerError{
+                message: String::from("Invalid char to symbol"),
+                string: String::from("a")
+            })),
     ];
 
     for (input, solution) in tests {
@@ -92,7 +123,8 @@ fn test_baby_tokenizer() {
             (Err(tokenizer_error), Err(solution_error)) => {
                 assert_eq!(tokenizer_error, solution_error);
             },
-            _  => {
+            (res, sol)  => {
+                println!("{:?} is not {:?}", res, sol);
                 assert!(false);
             }
         }

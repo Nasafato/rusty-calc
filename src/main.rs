@@ -33,7 +33,7 @@ fn handle_input(input: &str) {
             }
         },
         Err(error) => {
-            println!("{:?}", error);
+            println!("{}", error);
         }
     }
 }
