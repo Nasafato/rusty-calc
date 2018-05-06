@@ -2,6 +2,8 @@ use std::io;
 use std::io::prelude::*;
 
 mod tokenizer;
+mod evaluator;
+mod parser;
 
 fn main() {
     let mut input = String::new();
@@ -17,23 +19,31 @@ fn main() {
                 std::process::exit(0);
             }
             some_input  => {
-                handle_input(some_input);
+                match handle_input(some_input) {
+                    Ok(_) => {
+                        println!("Token success!");
+                    }
+                    Err(error) => {
+                        println!("Error: {}", error);
+                        std::process::exit(0);
+                    }
+                }
             }
         }
         input.clear();
     }
 }
 
-fn handle_input(input: &str) {
+fn handle_input(input: &str) -> Result<(), tokenizer::TokenizerError>{
     use tokenizer::Tokenizer;
-    match input.tokenize() {
-        Ok(tokens) => {
-            for token in tokens {
-                println!("{:?}", token);
-            }
-        },
+    let tokens = match input.tokenize() {
+        Ok(tokens) => tokens,
         Err(error) => {
-            println!("{}", error);
+            return Err(error);
         }
+    };
+    for token in tokens {
+        println!("{:?}", token);
     }
+    Ok(())
 }

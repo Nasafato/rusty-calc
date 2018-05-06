@@ -1,12 +1,43 @@
 use std::fmt;
 use std::error;
+use std::cmp::PartialOrd;
+use std::cmp::Ordering;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Symbol {
     Plus,
     Minus,
     Multiply,
     Divide
+}
+
+impl PartialOrd for Symbol {
+    fn partial_cmp(&self, other: &Symbol) -> Option<Ordering> {
+        match (*self, *other) {
+            (Symbol::Plus, Symbol::Plus) |
+            (Symbol::Minus, Symbol::Minus) |
+            (Symbol::Plus, Symbol::Minus) |
+            (Symbol::Minus, Symbol::Plus) |
+            (Symbol::Multiply, Symbol::Divide) |
+            (Symbol::Divide, Symbol::Multiply) |
+            (Symbol::Multiply, Symbol::Multiply) |
+            (Symbol::Divide, Symbol::Divide) => {
+                Some(Ordering::Equal)
+            }
+            (Symbol::Divide, Symbol::Minus) |
+            (Symbol::Divide, Symbol::Plus) |
+            (Symbol::Multiply, Symbol::Minus) |
+            (Symbol::Multiply, Symbol::Plus) => {
+                Some(Ordering::Greater)
+            }
+            (Symbol::Plus, Symbol::Multiply) |
+            (Symbol::Minus, Symbol::Multiply) |
+            (Symbol::Plus, Symbol::Divide) |
+            (Symbol::Minus, Symbol::Divide) => {
+                Some(Ordering::Less)
+            }
+        }
+    }
 }
 
 impl Symbol {
@@ -24,7 +55,7 @@ impl Symbol {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Token {
     Integer(u32),
     Operator(Symbol)
