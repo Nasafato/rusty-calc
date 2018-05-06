@@ -20,12 +20,9 @@ fn main() {
             }
             some_input  => {
                 match handle_input(some_input) {
-                    Ok(_) => {
-                        println!("Token success!");
-                    }
+                    Ok(_) => {}
                     Err(error) => {
                         println!("Error: {}", error);
-                        std::process::exit(0);
                     }
                 }
             }
@@ -34,16 +31,18 @@ fn main() {
     }
 }
 
-fn handle_input(input: &str) -> Result<(), tokenizer::TokenizerError>{
+type GenError = Box<std::error::Error>;
+type GenResult<T> = Result<T, GenError>;
+
+fn handle_input(input: &str) -> GenResult<()> {
     use tokenizer::Tokenizer;
-    let tokens = match input.tokenize() {
-        Ok(tokens) => tokens,
-        Err(error) => {
-            return Err(error);
-        }
-    };
-    for token in tokens {
-        println!("{:?}", token);
-    }
+    use parser::Parser;
+    use evaluator;
+
+    let tokens = input.tokenize()?;
+    let parser = Parser::new(tokens);
+    let expr = parser.parse()?;
+    let result = evaluator::evaluate(expr)?;
+    println!("Result: {}", result);
     Ok(())
 }

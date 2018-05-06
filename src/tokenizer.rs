@@ -100,6 +100,9 @@ impl Tokenizer for str {
                     start = end+1;
                     end = end+1;
                 }
+                // ' '|'\n'|'\t'|'\r' => {
+
+                // }
                 _ => {
                     return Err(TokenizerError{
                         message: String::from("Invalid char to symbol"),

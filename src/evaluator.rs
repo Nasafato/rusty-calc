@@ -5,7 +5,7 @@ use tokenizer::Symbol;
 use parser::Expr;
 
 #[derive(Debug)]
-struct EvaluationError {
+pub struct EvaluationError {
     message: String
 }
 
@@ -21,7 +21,7 @@ impl error::Error for EvaluationError {
     }
 }
 
-fn evaluate(expr: Expr) -> Result<u32, EvaluationError> {
+pub fn evaluate(expr: Expr) -> Result<u32, EvaluationError> {
     match expr {
         Expr::Expression(left, op, right) => {
             let left = evaluate(*left).unwrap();

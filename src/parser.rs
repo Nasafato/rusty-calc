@@ -3,7 +3,7 @@ use std::fmt;
 use std::error;
 
 #[derive(Debug, Clone, PartialEq)]
-struct ParserError {
+pub struct ParserError {
     pub message: String
 }
 
@@ -25,7 +25,7 @@ pub enum Expr {
     Expression(Box<Expr>, Symbol, Box<Expr>),
 }
 
-struct Parser {
+pub struct Parser {
     tokens: Vec<Token>
 }
 
